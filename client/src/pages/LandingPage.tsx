@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
 import MainLayout from '../layouts/MainLayout';
 import { AnimatedLinkButton } from '../components/animate-ui/button';
+import AnimatedAccordion from '../components/animate-ui/accordion';
+import { Reveal, Stagger, StaggerItem } from '../components/animate-ui/motion';
+import { softTransition, springTransition } from '../components/animate-ui/transitions';
 
 const showcaseSlides = [
   {
@@ -82,17 +84,17 @@ const LandingPage = () => {
           <div className="max-w-xl xl:max-w-2xl">
             <motion.h1
               className="mt-4 max-w-[10.5ch] font-serif text-[2.65rem] font-semibold leading-[0.98] text-ink dark:text-slate-100 sm:text-[3.2rem] lg:text-[4rem] xl:text-[4.45rem]"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, ease: 'easeOut' }}
+              initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={softTransition}
             >
               Publish sharper stories without slowing down your thinking.
             </motion.h1>
             <motion.p
               className="mt-6 max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:text-lg"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08, duration: 0.55, ease: 'easeOut' }}
+              initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={{ ...softTransition, delay: 0.08 }}
             >
               BlogIT gives writers a focused place to draft, refine, and share work with a reading experience that
               stays calm, clear, and easy to return to.
@@ -102,7 +104,7 @@ const LandingPage = () => {
               className="mt-7 flex flex-wrap items-center gap-3"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.14, duration: 0.5, ease: 'easeOut' }}
+              transition={{ ...softTransition, delay: 0.14 }}
             >
               <AnimatedLinkButton to="/write" size="lg">
                 Start a draft
@@ -134,7 +136,7 @@ const LandingPage = () => {
                 transition={{
                   delay: index * showcaseAnimationDuration,
                   duration: showcaseAnimationDuration,
-                  ease: ['easeOut', 'backOut', 'easeIn'],
+                  ease: ['easeOut', [0.34, 1.56, 0.64, 1], 'easeIn'],
                   repeat: Infinity,
                   repeatDelay: showcaseRestDuration,
                   times: [0, 0.42, 0.72, 1]
@@ -152,7 +154,7 @@ const LandingPage = () => {
       </section>
 
       <section className="mt-12 grid gap-7 lg:grid-cols-[minmax(0,0.86fr)_minmax(360px,0.78fr)] lg:items-center">
-        <div className="min-w-0">
+        <Reveal className="min-w-0">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">Workflow</p>
           <h2 className="mt-3 max-w-xl font-serif text-3xl font-semibold leading-tight text-ink dark:text-slate-100 sm:text-[2.35rem]">
             A writing setup that stays useful from the first line to the final revision.
@@ -161,32 +163,26 @@ const LandingPage = () => {
             The experience is built to keep you oriented. Drafts stay accessible, published pieces stay clean, and the
             interface keeps your attention on the writing itself.
           </p>
-          <div className="mt-6 space-y-3">
+          <Stagger className="mt-6 space-y-3">
             {workflow.map((item, index) => (
-              <motion.div
+              <StaggerItem
                 key={item.step}
                 className="grid gap-4 rounded-2xl border border-slate-200/80 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-950 sm:grid-cols-[68px_minmax(0,1fr)]"
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.35 }}
-                transition={{ delay: index * 0.07, duration: 0.45 }}
+                transition={{ ...softTransition, delay: index * 0.03 }}
               >
                 <div className="text-sm font-extrabold uppercase tracking-[0.18em] text-accent">{item.step}</div>
                 <div>
                   <h3 className="text-base font-semibold text-ink dark:text-slate-100 sm:text-lg">{item.title}</h3>
                   <p className="mt-1.5 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.copy}</p>
                 </div>
-              </motion.div>
+              </StaggerItem>
             ))}
-          </div>
-        </div>
+          </Stagger>
+        </Reveal>
 
-        <motion.div
+        <Reveal
           className="min-w-0"
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.55 }}
+          delay={0.08}
         >
           <div className="relative flex min-h-[360px] items-center justify-center px-5 py-6 sm:min-h-[430px]">
             <img
@@ -195,17 +191,12 @@ const LandingPage = () => {
               className="max-h-[320px] w-full max-w-[430px] object-contain drop-shadow-[0_26px_58px_rgba(15,23,42,0.18)] sm:max-h-[390px]"
             />
           </div>
-        </motion.div>
+        </Reveal>
       </section>
 
       <section className="mt-12">
         <div className="grid items-center gap-7 rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_18px_52px_rgba(15,23,42,0.07)] dark:border-slate-800 dark:bg-slate-950 sm:p-7 lg:grid-cols-[minmax(0,0.82fr)_minmax(340px,0.9fr)] lg:gap-8">
-          <motion.div
-            initial={{ opacity: 0, x: -18 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.45 }}
-          >
+          <Reveal>
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">More to Explore</p>
             <h2 className="mt-3 max-w-xl font-serif text-3xl font-semibold leading-tight text-ink dark:text-slate-100 sm:text-[2.35rem]">
               Dedicated spaces for the people, posts, and momentum around your writing.
@@ -224,14 +215,14 @@ const LandingPage = () => {
                 <p className="mt-1.5 text-sm leading-6 text-slate-600 dark:text-slate-300">{supportPanels[1].copy}</p>
               </div>
             </div>
-          </motion.div>
+          </Reveal>
 
           <motion.div
             className="flex items-center justify-center p-4"
             initial={{ opacity: 0, x: 18 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.45 }}
+            transition={softTransition}
             whileHover={{ y: -4 }}
           >
             <img
@@ -243,70 +234,26 @@ const LandingPage = () => {
         </div>
 
         <div className="mt-6 grid items-center gap-7 rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_18px_52px_rgba(15,23,42,0.07)] dark:border-slate-800 dark:bg-slate-950 sm:p-7 lg:grid-cols-[minmax(280px,0.82fr)_minmax(340px,0.9fr)] lg:gap-8">
-          <motion.div
-            className="self-start"
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.35 }}
-            transition={{ duration: 0.45 }}
-          >
+          <Reveal className="self-start">
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">Community Layer</p>
             <h2 className="mt-3 max-w-xl font-serif text-3xl font-semibold leading-tight text-ink dark:text-slate-100 sm:text-[2.35rem]">
               {supportPanels[1].title}
             </h2>
             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">{supportPanels[1].copy}</p>
-            <div className="mt-6 max-w-xl space-y-3">
-              {communityCards.map((item, index) => {
-                const isOpen = openCommunityCard === index;
-
-                return (
-                  <motion.div
-                    key={item.title}
-                    className="overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-900/70"
-                    initial={{ opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.35 }}
-                    transition={{ delay: index * 0.06, duration: 0.35 }}
-                  >
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-                      onClick={() => setOpenCommunityCard(isOpen ? -1 : index)}
-                      aria-expanded={isOpen}
-                    >
-                      <span className="text-base font-semibold text-ink dark:text-slate-100">{item.title}</span>
-                      <motion.span
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-accent shadow-sm dark:bg-slate-950"
-                        animate={{ rotate: isOpen ? 180 : 0 }}
-                        transition={{ duration: 0.22 }}
-                      >
-                        <ChevronDown className="h-4 w-4" aria-hidden="true" />
-                      </motion.span>
-                    </button>
-                    <AnimatePresence initial={false}>
-                      {isOpen ? (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.26, ease: 'easeOut' }}
-                        >
-                          <p className="px-5 pb-4 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.copy}</p>
-                        </motion.div>
-                      ) : null}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
+            <AnimatedAccordion
+              items={communityCards}
+              openIndex={openCommunityCard}
+              onOpenChange={setOpenCommunityCard}
+              className="mt-6 max-w-xl"
+            />
+          </Reveal>
 
           <motion.div
             className="flex items-center justify-center"
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.35 }}
-            transition={{ delay: 0.06, duration: 0.45 }}
+            transition={{ ...springTransition, delay: 0.06 }}
             whileHover={{ y: -4 }}
           >
             <img

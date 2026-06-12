@@ -35,6 +35,36 @@ const blogSchema = new mongoose.Schema(
       maxlength: 200,
       default: ''
     },
+    likes: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    shares: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    comments: [
+      {
+        name: {
+          type: String,
+          trim: true,
+          maxlength: 80,
+          default: 'Reader'
+        },
+        message: {
+          type: String,
+          required: true,
+          trim: true,
+          maxlength: 600
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
     publishedAt: {
       type: Date
     }

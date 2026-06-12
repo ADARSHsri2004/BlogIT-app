@@ -19,8 +19,18 @@ export interface Blog {
   summary?: string;
   status: BlogStatus;
   author: User;
+  likes?: number;
+  shares?: number;
+  comments?: BlogComment[];
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
+}
+
+export interface BlogComment {
+  _id?: string;
+  name: string;
+  message: string;
+  createdAt: string;
 }
 

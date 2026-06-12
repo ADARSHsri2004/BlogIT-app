@@ -1,48 +1,96 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Eye, Heart, MessageCircle, MoreVertical } from 'lucide-react';
 import type { Blog } from '../utils/types';
 import { formatDisplayDate, getEditorialImage } from '../utils/editorial';
+import { Card, CardBody } from './ui/Card';
+import { springTransition } from './animate-ui/transitions';
 
-const BlogCard = ({ blog }: { blog: Blog }) => (
-  <motion.article
-    className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
-    initial={{ opacity: 0, y: 14 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.2 }}
-    whileHover={{ y: -5, boxShadow: '0 18px 45px rgba(15, 23, 42, 0.12)' }}
-    transition={{ duration: 0.36, ease: 'easeOut' }}
+type BlogCardProps = {
+  blog: Blog;
+};
+
+const getReadTime = (content: string) => {
+  const words = content.trim().split(/\s+/).filter(Boolean).length;
+  return `${Math.max(1, Math.ceil(words / 220))} min`;
+};
+
+const BlogCard = ({ blog }: BlogCardProps) => (
+  <Card
+    className="min-h-full"
+    whileHover={{ y: -6, boxShadow: '0 22px 54px rgba(15, 23, 42, 0.11)' }}
+    transition={springTransition}
   >
-    <Link to={`/blog/${blog.slug}`} className="block h-52 overflow-hidden bg-slate-100 dark:bg-slate-700">
+    <Link
+      to={`/blog/${blog.slug}`}
+      className="block h-60 overflow-hidden bg-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-accent/50 dark:bg-slate-800"
+      aria-label={`Read ${blog.title}`}
+    >
       <img
         src={getEditorialImage(blog)}
         alt=""
-        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
       />
     </Link>
-    <div className="p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <Link
-            to={`/blog/${blog.slug}`}
-            className="font-serif text-xl font-semibold text-ink group-hover:text-accent dark:text-slate-100"
-          >
-            {blog.title}
-          </Link>
-          <p className="mt-2 line-clamp-2 text-sm text-muted dark:text-slate-300">
-            {blog.summary || 'No summary provided.'}
-          </p>
-          <div className="mt-3 flex items-center gap-2 text-xs text-muted dark:text-slate-300">
-            <span className="font-medium text-ink dark:text-slate-100">{blog.author?.name || 'Unknown'}</span>
-            <span>/</span>
-            <span>{formatDisplayDate(blog.publishedAt || blog.createdAt)}</span>
+    <CardBody className="flex min-h-[270px] flex-col justify-between px-5 py-5">
+      <div>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <img
+              src={getEditorialImage(blog)}
+              alt=""
+              className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-white dark:ring-slate-950"
+            />
+            <div className="min-w-0">
+              <div className="truncate text-xs font-semibold text-ink dark:text-slate-100">
+                {blog.author?.name || 'Unknown writer'}
+              </div>
+              <div className="mt-0.5 flex items-center gap-1.5 text-[0.7rem] text-slate-500 dark:text-slate-400">
+                <time dateTime={blog.publishedAt || blog.createdAt}>{formatDisplayDate(blog.publishedAt || blog.createdAt)}</time>
+                <span>-</span>
+                <span>{getReadTime(blog.content)}</span>
+              </div>
+            </div>
           </div>
+          <button
+            type="button"
+            className="flex h-8 w-8 shrink-0 items-center justify-center text-slate-700 transition hover:bg-slate-50 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 dark:text-slate-300 dark:hover:bg-slate-900"
+            aria-label={`More options for ${blog.title}`}
+          >
+            <MoreVertical className="h-4 w-4" />
+          </button>
         </div>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase text-ink dark:bg-slate-700 dark:text-slate-100">
-          {blog.status}
-        </span>
+
+        <Link
+          to={`/blog/${blog.slug}`}
+          className="mt-5 block font-serif text-[1.6rem] font-semibold italic leading-[1.08] text-slate-700 outline-none transition group-hover:text-accent focus-visible:text-accent dark:text-slate-100"
+        >
+          {blog.title}
+        </Link>
+        <p className="mt-4 line-clamp-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
+          {blog.summary || 'No summary provided.'}
+        </p>
       </div>
-    </div>
-  </motion.article>
+
+      <div className="mt-8 border-t border-slate-200 pt-3 transition-colors group-hover:border-slate-300 dark:border-slate-800 dark:group-hover:border-slate-700">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-4">
+            <span className="inline-flex items-center gap-1.5" aria-label={`${blog.shares ?? 0} views`}>
+              <Eye className="h-4 w-4" />
+              {blog.shares ?? 0}
+            </span>
+            <span className="inline-flex items-center gap-1.5" aria-label={`${blog.comments?.length ?? 0} comments`}>
+              <MessageCircle className="h-4 w-4" />
+              {blog.comments?.length ?? 0}
+            </span>
+          </div>
+          <span className="inline-flex items-center gap-1.5 text-rose-500" aria-label={`${blog.likes ?? 0} likes`}>
+            <Heart className="h-4 w-4" />
+            <span className="sr-only">{blog.likes ?? 0}</span>
+          </span>
+        </div>
+      </div>
+    </CardBody>
+  </Card>
 );
 
 export default BlogCard;

@@ -132,12 +132,64 @@ const deleteBlog = asyncHandler(async (req, res) => {
   return res.json({ message: 'Blog deleted' });
 });
 
+const likeBlog = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const blog = await Blog.findOneAndUpdate(
+    { _id: id, status: 'published' },
+    { $inc: { likes: 1 } },
+    { new: true }
+  ).populate('author', 'name email');
+
+  if (!blog) {
+    return res.status(404).json({ message: 'Blog not found' });
+  }
+
+  return res.json({ blog });
+});
+
+const shareBlog = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const blog = await Blog.findOneAndUpdate(
+    { _id: id, status: 'published' },
+    { $inc: { shares: 1 } },
+    { new: true }
+  ).populate('author', 'name email');
+
+  if (!blog) {
+    return res.status(404).json({ message: 'Blog not found' });
+  }
+
+  return res.json({ blog });
+});
+
+const commentOnBlog = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const name = (req.body.name || 'Reader').trim().slice(0, 80) || 'Reader';
+  const message = (req.body.message || '').trim().slice(0, 600);
+
+  if (!message) {
+    return res.status(400).json({ message: 'Comment cannot be empty' });
+  }
+
+  const blog = await Blog.findOne({ _id: id, status: 'published' }).populate('author', 'name email');
+  if (!blog) {
+    return res.status(404).json({ message: 'Blog not found' });
+  }
+
+  blog.comments.push({ name, message });
+  await blog.save();
+  return res.status(201).json({ blog });
+});
+
 module.exports = {
   createBlog,
   listPublished,
   listMine,
   getBySlug,
   updateBlog,
-  deleteBlog
+  deleteBlog,
+  likeBlog,
+  shareBlog,
+  commentOnBlog
 };
 

@@ -37,3 +37,18 @@ export const deleteBlog = async (id: string): Promise<void> => {
   await api.delete(`/blogs/${id}`);
 };
 
+export const likeBlog = async (id: string): Promise<Blog> => {
+  const { data } = await api.post(`/blogs/${id}/like`);
+  return data.blog;
+};
+
+export const shareBlog = async (id: string): Promise<Blog> => {
+  const { data } = await api.post(`/blogs/${id}/share`);
+  return data.blog;
+};
+
+export const commentOnBlog = async (id: string, payload: { name?: string; message: string }): Promise<Blog> => {
+  const { data } = await api.post(`/blogs/${id}/comments`, payload);
+  return data.blog;
+};
+
