@@ -4,6 +4,7 @@ import Spinner from '../components/Spinner';
 import EmptyState from '../components/EmptyState';
 import BlogCard from '../components/BlogCard';
 import { fetchPublishedBlogs } from '../services/blogs';
+import { AnimatedLinkButton } from '../components/animate-ui/button';
 
 const FeedPage = () => {
   const { data, isLoading, error } = useQuery({
@@ -26,12 +27,9 @@ const FeedPage = () => {
           title="Nothing published yet"
           description="Be the first to publish a story."
           action={
-            <a
-              href="/write"
-              className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent"
-            >
+            <AnimatedLinkButton to="/write" size="sm">
               Start writing
-            </a>
+            </AnimatedLinkButton>
           }
         />
       ) : null}

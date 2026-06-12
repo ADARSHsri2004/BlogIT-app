@@ -11,11 +11,10 @@ export default {
         soft: '#f8fafc'
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        serif: ['Georgia', 'ui-serif', 'serif']
+        sans: ['Manrope', 'system-ui', 'sans-serif'],
+        serif: ['Fraunces', 'ui-serif', 'serif']
       }
     },
   },
   plugins: [],
 };
-

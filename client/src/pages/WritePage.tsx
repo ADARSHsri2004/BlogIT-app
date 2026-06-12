@@ -6,6 +6,7 @@ import MarkdownEditor from '../components/MarkdownEditor';
 import Spinner from '../components/Spinner';
 import EmptyState from '../components/EmptyState';
 import { createBlog, fetchBlogBySlug, updateBlog } from '../services/blogs';
+import { AnimatedButton } from '../components/animate-ui/button';
 
 const WritePage = () => {
   const { slug } = useParams();
@@ -91,13 +92,12 @@ const WritePage = () => {
               <option value="draft">Draft</option>
               <option value="published">Published</option>
             </select>
-            <button
+            <AnimatedButton
               type="submit"
-              className="rounded-full bg-ink px-6 py-2 text-sm font-semibold text-white transition hover:bg-accent"
               disabled={mutation.isPending}
             >
               {mutation.isPending ? 'Saving...' : slug ? 'Update' : 'Publish'}
-            </button>
+            </AnimatedButton>
             {mutation.error ? (
               <span className="text-sm text-red-600">{(mutation.error as Error).message}</span>
             ) : null}

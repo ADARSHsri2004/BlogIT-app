@@ -1,9 +1,17 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import type { Blog } from '../utils/types';
 import { formatDisplayDate, getEditorialImage } from '../utils/editorial';
 
 const BlogCard = ({ blog }: { blog: Blog }) => (
-  <article className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-700 dark:bg-slate-800">
+  <motion.article
+    className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
+    initial={{ opacity: 0, y: 14 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.2 }}
+    whileHover={{ y: -5, boxShadow: '0 18px 45px rgba(15, 23, 42, 0.12)' }}
+    transition={{ duration: 0.36, ease: 'easeOut' }}
+  >
     <Link to={`/blog/${blog.slug}`} className="block h-52 overflow-hidden bg-slate-100 dark:bg-slate-700">
       <img
         src={getEditorialImage(blog)}
@@ -34,7 +42,7 @@ const BlogCard = ({ blog }: { blog: Blog }) => (
         </span>
       </div>
     </div>
-  </article>
+  </motion.article>
 );
 
 export default BlogCard;

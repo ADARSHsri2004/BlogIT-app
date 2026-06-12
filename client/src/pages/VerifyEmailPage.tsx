@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import Spinner from '../components/Spinner';
 import EmptyState from '../components/EmptyState';
 import { verifyEmail } from '../services/auth';
+import { AnimatedLinkButton } from '../components/animate-ui/button';
 
 const VerifyEmailPage = () => {
   const [params] = useSearchParams();
@@ -34,9 +35,9 @@ const VerifyEmailPage = () => {
             title="Verification failed"
             description={error}
             action={
-              <Link to="/auth" className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent">
+              <AnimatedLinkButton to="/auth" size="sm">
                 Back to sign in
-              </Link>
+              </AnimatedLinkButton>
             }
           />
         ) : (

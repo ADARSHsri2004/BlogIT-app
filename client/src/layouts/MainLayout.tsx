@@ -1,11 +1,13 @@
 import Navbar from '../components/Navbar';
+import GradientBackground from '../components/animate-ui/GradientBackground';
+import PageTransition from '../components/animate-ui/PageTransition';
 
-const MainLayout = ({ children }: { children: React.ReactNode }) => (
-  <div className="min-h-screen bg-soft text-ink transition-colors duration-200 dark:bg-slate-900 dark:text-slate-100">
+const MainLayout = ({ children, contentClassName }: { children: React.ReactNode; contentClassName?: string }) => (
+  <div className="relative min-h-screen text-ink transition-colors duration-200 dark:text-slate-100">
+    <GradientBackground />
     <Navbar />
-    <main className="mx-auto max-w-6xl px-4 pb-16 pt-8">{children}</main>
+    <PageTransition className={contentClassName}>{children}</PageTransition>
   </div>
 );
 
 export default MainLayout;
-

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import MainLayout from '../layouts/MainLayout';
@@ -8,6 +8,7 @@ import EmptyState from '../components/EmptyState';
 import { deleteBlog, fetchBlogBySlug } from '../services/blogs';
 import { useAuth } from '../hooks/useAuth';
 import { formatDisplayDate, getEditorialImage } from '../utils/editorial';
+import { AnimatedButton, AnimatedLinkButton } from '../components/animate-ui/button';
 
 const BlogPage = () => {
   const { slug } = useParams();
@@ -55,18 +56,21 @@ const BlogPage = () => {
             </div>
             {isAuthor ? (
               <div className="flex gap-2">
-                <Link
+                <AnimatedLinkButton
                   to={`/write/${blog.slug}`}
-                  className="rounded-md border border-slate-200 px-3 py-2 text-sm font-semibold text-ink hover:border-accent"
+                  variant="secondary"
+                  size="sm"
                 >
                   Edit
-                </Link>
-                <button
+                </AnimatedLinkButton>
+                <AnimatedButton
                   onClick={() => deleteMutation.mutate(blog._id)}
-                  className="rounded-md bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-100"
+                  variant="danger"
+                  size="sm"
+                  disabled={deleteMutation.isPending}
                 >
                   Delete
-                </button>
+                </AnimatedButton>
               </div>
             ) : null}
           </div>

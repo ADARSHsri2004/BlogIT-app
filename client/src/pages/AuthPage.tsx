@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { GoogleLogin } from '@react-oauth/google';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import { useAuth } from '../hooks/useAuth';
 import { forgotPassword } from '../services/auth';
+import { AnimatedButton } from '../components/animate-ui/button';
 
 type Mode = 'login' | 'register';
 
@@ -71,7 +73,12 @@ const AuthPage = () => {
 
   return (
     <MainLayout>
-      <div className="mx-auto max-w-lg space-y-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+      <motion.div
+        className="mx-auto max-w-lg space-y-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.38, ease: 'easeOut' }}
+      >
         <div className="flex items-center justify-between">
           <h1 className="font-serif text-3xl font-bold text-ink dark:text-slate-100">
             {mode === 'login' ? 'Welcome back' : 'Join BlogIT'}
@@ -84,8 +91,15 @@ const AuthPage = () => {
           </button>
         </div>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          {mode === 'register' ? (
-            <>
+          <AnimatePresence mode="popLayout">
+            {mode === 'register' ? (
+            <motion.div
+              className="space-y-4"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+            >
               <div>
                 <label className="text-sm font-semibold text-ink dark:text-slate-100">Name</label>
                 <input
@@ -106,8 +120,9 @@ const AuthPage = () => {
                   <option value="reader">Reader</option>
                 </select>
               </div>
-            </>
-          ) : null}
+            </motion.div>
+            ) : null}
+          </AnimatePresence>
           <div>
             <label className="text-sm font-semibold text-ink dark:text-slate-100">Email</label>
             <input
@@ -136,13 +151,14 @@ const AuthPage = () => {
           ) : null}
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
           {info ? <p className="text-sm text-emerald-600">{info}</p> : null}
-          <button
+          <AnimatedButton
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent"
+            className="w-full"
+            size="lg"
           >
             {isSubmitting ? 'Working...' : mode === 'login' ? 'Sign in' : 'Create account'}
-          </button>
+          </AnimatedButton>
         </form>
         {mode === 'login' ? (
           <button type="button" onClick={handleResendVerification} className="mx-auto block text-sm font-semibold text-accent">
@@ -178,7 +194,7 @@ const AuthPage = () => {
             <p className="text-center text-sm text-red-600">Google sign-in needs VITE_GOOGLE_CLIENT_ID.</p>
           )}
         </div>
-      </div>
+      </motion.div>
     </MainLayout>
   );
 };

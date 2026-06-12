@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import { resetPassword } from '../services/auth';
+import { AnimatedButton } from '../components/animate-ui/button';
 
 const ResetPasswordPage = () => {
   const [params] = useSearchParams();
@@ -67,12 +68,13 @@ const ResetPasswordPage = () => {
           </div>
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
           {message ? <p className="text-sm text-emerald-600">{message}</p> : null}
-          <button
+          <AnimatedButton
             type="submit"
-            className="w-full rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white transition hover:bg-accent"
+            className="w-full"
+            size="lg"
           >
             Reset password
-          </button>
+          </AnimatedButton>
         </form>
         <Link to="/auth" className="block text-center text-sm font-semibold text-accent">
           Back to sign in
