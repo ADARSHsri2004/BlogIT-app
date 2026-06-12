@@ -21,7 +21,40 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 6,
+      minlength: 8,
+      select: false
+    },
+    role: {
+      type: String,
+      enum: ['admin', 'author', 'reader'],
+      default: 'author'
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false
+    },
+    emailVerificationTokenHash: {
+      type: String,
+      select: false
+    },
+    emailVerificationExpires: {
+      type: Date,
+      select: false
+    },
+    passwordResetTokenHash: {
+      type: String,
+      select: false
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false
+    },
+    refreshTokenHash: {
+      type: String,
+      select: false
+    },
+    refreshTokenExpires: {
+      type: Date,
       select: false
     },
     bio: {

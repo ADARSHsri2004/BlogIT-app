@@ -1,16 +1,29 @@
 import { createContext, useContext } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchMe, login, logout, register, googleLogin, type AuthPayload } from '../services/auth';
+import {
+  fetchMe,
+  login,
+  logout,
+  register,
+  googleLogin,
+  resendVerification,
+  type AuthPayload,
+  type AuthResult
+} from '../services/auth';
 import type { ReactNode } from 'react';
-import type { User } from '../utils/types';
+import type { User, UserRole } from '../utils/types';
 
 interface AuthContextValue {
   user: User | undefined;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isVerified: boolean;
+  canWrite: boolean;
+  hasRole: (...roles: UserRole[]) => boolean;
   loginUser: (payload: AuthPayload) => Promise<User>;
-  registerUser: (payload: AuthPayload) => Promise<User>;
+  registerUser: (payload: AuthPayload) => Promise<AuthResult>;
   googleLoginUser: (credential: string) => Promise<User>;
+  resendVerificationEmail: (email: string) => Promise<string>;
   logoutUser: () => Promise<void>;
 }
 
@@ -25,15 +38,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const loginUser = async (payload: AuthPayload) => {
-    const logged = await login(payload);
-    queryClient.setQueryData(['me'], logged);
-    return logged;
+    const result = await login(payload);
+    queryClient.setQueryData(['me'], result.user);
+    return result.user;
   };
 
   const registerUser = async (payload: AuthPayload) => {
-    const registered = await register(payload);
-    queryClient.setQueryData(['me'], registered);
-    return registered;
+    return register(payload);
   };
 
   const logoutUser = async () => {
@@ -47,13 +58,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         isLoading,
         isAuthenticated: Boolean(user),
+        isVerified: Boolean(user?.emailVerified),
+        canWrite: Boolean(user && user.emailVerified && ['admin', 'author'].includes(user.role)),
+        hasRole: (...roles: UserRole[]) => Boolean(user && roles.includes(user.role)),
         loginUser,
         registerUser,
         googleLoginUser: async (credential: string) => {
-          const logged = await googleLogin(credential);
-          queryClient.setQueryData(['me'], logged);
-          return logged;
+          const result = await googleLogin(credential);
+          queryClient.setQueryData(['me'], result.user);
+          return result.user;
         },
+        resendVerificationEmail: async (email: string) => (await resendVerification(email)).message,
         logoutUser
       }}
     >

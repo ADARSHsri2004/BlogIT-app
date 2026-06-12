@@ -1,4 +1,5 @@
 const http = require('http');
+const mongoose = require('mongoose');
 const app = require('./app');
 const connectDB = require('./utils/db');
 const { PORT } = require('./utils/config');
@@ -18,4 +19,15 @@ const start = async () => {
 };
 
 start();
+
+const shutdown = (signal) => {
+  process.stdout.write(`${signal} received. Shutting down...\n`);
+  server.close(async () => {
+    await mongoose.connection.close();
+    process.exit(0);
+  });
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 

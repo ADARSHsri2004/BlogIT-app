@@ -6,6 +6,8 @@ import WritePage from './pages/WritePage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 const App = () => (
   <Routes>
@@ -15,7 +17,7 @@ const App = () => (
     <Route
       path="/write"
       element={
-        <ProtectedRoute>
+        <ProtectedRoute roles={['admin', 'author']} requireVerified>
           <WritePage />
         </ProtectedRoute>
       }
@@ -23,7 +25,7 @@ const App = () => (
     <Route
       path="/write/:slug"
       element={
-        <ProtectedRoute>
+        <ProtectedRoute roles={['admin', 'author']} requireVerified>
           <WritePage />
         </ProtectedRoute>
       }
@@ -37,6 +39,8 @@ const App = () => (
       }
     />
     <Route path="/auth" element={<AuthPage />} />
+    <Route path="/verify-email" element={<VerifyEmailPage />} />
+    <Route path="/reset-password" element={<ResetPasswordPage />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );

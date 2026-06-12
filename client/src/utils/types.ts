@@ -1,4 +1,5 @@
 export type BlogStatus = 'draft' | 'published';
+export type UserRole = 'admin' | 'author' | 'reader';
 
 export interface User {
   id?: string;
@@ -6,6 +7,8 @@ export interface User {
   name: string;
   email: string;
   bio?: string;
+  role: UserRole;
+  emailVerified: boolean;
 }
 
 export interface Blog {

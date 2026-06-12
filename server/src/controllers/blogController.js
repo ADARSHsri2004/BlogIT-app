@@ -46,10 +46,18 @@ const createBlog = asyncHandler(async (req, res) => {
 });
 
 const listPublished = asyncHandler(async (req, res) => {
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 12, 1), 50);
+  const skip = (page - 1) * limit;
+  const query = { status: 'published' };
+
   const blogs = await Blog.find({ status: 'published' })
     .populate('author', 'name email')
-    .sort({ publishedAt: -1, createdAt: -1 });
-  return res.json({ blogs });
+    .sort({ publishedAt: -1, createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+  const total = await Blog.countDocuments(query);
+  return res.json({ blogs, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
 });
 
 const listMine = asyncHandler(async (req, res) => {
@@ -65,7 +73,8 @@ const getBySlug = asyncHandler(async (req, res) => {
   }
 
   const isAuthor = req.user?.id && blog.author._id.toString() === req.user.id;
-  if (blog.status === 'draft' && !isAuthor) {
+  const isAdmin = req.user?.role === 'admin';
+  if (blog.status === 'draft' && !isAuthor && !isAdmin) {
     return res.status(404).json({ message: 'Blog not found' });
   }
 
@@ -80,7 +89,7 @@ const updateBlog = asyncHandler(async (req, res) => {
   if (!blog) {
     return res.status(404).json({ message: 'Blog not found' });
   }
-  if (blog.author.toString() !== req.user.id) {
+  if (blog.author.toString() !== req.user.id && req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Not authorized to update this blog' });
   }
 
@@ -115,7 +124,7 @@ const deleteBlog = asyncHandler(async (req, res) => {
   if (!blog) {
     return res.status(404).json({ message: 'Blog not found' });
   }
-  if (blog.author.toString() !== req.user.id) {
+  if (blog.author.toString() !== req.user.id && req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Not authorized to delete this blog' });
   }
 

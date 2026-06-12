@@ -22,13 +22,18 @@ const ProfilePage = () => {
             <p className="text-xs uppercase tracking-[0.2em] text-muted dark:text-slate-300">Profile</p>
             <h1 className="font-serif text-3xl font-bold text-ink dark:text-slate-100">{user?.name}</h1>
             <p className="text-sm text-muted dark:text-slate-300">{user?.email}</p>
+            <p className="mt-2 text-sm text-muted dark:text-slate-300">
+              {user?.role} {user?.emailVerified ? '• verified' : '• email verification pending'}
+            </p>
           </div>
-          <Link
-            to="/write"
-            className="rounded-full bg-ink px-5 py-2 text-sm font-semibold text-white transition hover:bg-accent"
-          >
-            Write a story
-          </Link>
+          {user?.emailVerified && ['admin', 'author'].includes(user.role) ? (
+            <Link
+              to="/write"
+              className="rounded-full bg-ink px-5 py-2 text-sm font-semibold text-white transition hover:bg-accent"
+            >
+              Write a story
+            </Link>
+          ) : null}
         </div>
         <div className="mt-8">
           <h2 className="text-lg font-semibold text-ink dark:text-slate-100">Your drafts & posts</h2>

@@ -24,9 +24,11 @@ const Navbar = () => {
           <Link to="/feed" className="text-sm font-medium text-ink hover:text-accent dark:text-slate-100">
             Feed
           </Link>
-          <Link to="/write" className="text-sm font-medium text-ink hover:text-accent dark:text-slate-100">
-            Write
-          </Link>
+          {user?.emailVerified && ['admin', 'author'].includes(user.role) ? (
+            <Link to="/write" className="text-sm font-medium text-ink hover:text-accent dark:text-slate-100">
+              Write
+            </Link>
+          ) : null}
           <ThemeToggle />
           {user ? (
             <>
@@ -36,6 +38,7 @@ const Navbar = () => {
               >
                 {user.name}
               </Link>
+              {!user.emailVerified ? <span className="text-xs font-semibold text-amber-600">Verify email</span> : null}
               <button
                 onClick={handleLogout}
                 className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent"
@@ -75,14 +78,17 @@ const Navbar = () => {
               <Link to="/feed" className="block text-sm font-medium text-ink dark:text-slate-100" onClick={() => setOpen(false)}>
                 Feed
               </Link>
-              <Link to="/write" className="block text-sm font-medium text-ink dark:text-slate-100" onClick={() => setOpen(false)}>
-                Write
-              </Link>
+              {user?.emailVerified && ['admin', 'author'].includes(user.role) ? (
+                <Link to="/write" className="block text-sm font-medium text-ink dark:text-slate-100" onClick={() => setOpen(false)}>
+                  Write
+                </Link>
+              ) : null}
               {user ? (
                 <>
                   <Link to="/profile" className="block text-sm font-medium text-ink dark:text-slate-100" onClick={() => setOpen(false)}>
                     {user.name}
                   </Link>
+                  {!user.emailVerified ? <div className="text-xs font-semibold text-amber-600">Verify your email to publish</div> : null}
                   <button
                     onClick={handleLogout}
                     className="w-full rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent"
