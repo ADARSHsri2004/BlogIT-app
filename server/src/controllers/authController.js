@@ -22,7 +22,9 @@ const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : nul
 const isProduction = NODE_ENV === 'production';
 const baseCookieOptions = {
   httpOnly: true,
-  sameSite: 'lax',
+  // Vercel frontend + Render API are cross-site in production, so cookies
+  // must be marked for cross-site delivery over HTTPS.
+  sameSite: isProduction ? 'none' : 'lax',
   secure: isProduction
 };
 
