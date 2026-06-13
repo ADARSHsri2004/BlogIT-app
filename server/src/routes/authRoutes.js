@@ -5,6 +5,7 @@ const {
   refresh,
   logout,
   me,
+  updateProfile,
   verifyEmail,
   resendVerification,
   forgotPassword,
@@ -21,6 +22,7 @@ router.post('/refresh', refresh);
 router.post('/google', googleLogin);
 router.post('/logout', auth, logout);
 router.get('/me', auth, me);
+router.put('/profile', auth, updateProfile);
 router.post('/verify-email', verifyEmail);
 router.post('/resend-verification', resendVerification);
 router.post('/forgot-password', forgotPassword);

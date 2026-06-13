@@ -24,10 +24,18 @@ const sanitizeSummary = (content, summary) => {
   return plain.slice(0, 180);
 };
 
+const isAllowedImageDataUrl = (value) =>
+  typeof value === 'string' &&
+  /^data:image\/(png|jpe?g|webp|gif);base64,/i.test(value) &&
+  value.length <= 400000;
+
 const createBlog = asyncHandler(async (req, res) => {
-  const { title, content, status = 'draft', summary } = req.body;
+  const { title, content, status = 'draft', summary, coverImageUrl } = req.body;
   if (!title || !content) {
     return res.status(400).json({ message: 'Title and content are required' });
+  }
+  if (coverImageUrl !== undefined && coverImageUrl !== '' && !isAllowedImageDataUrl(coverImageUrl)) {
+    return res.status(400).json({ message: 'Cover image must be a PNG, JPG, WEBP, or GIF under 400 KB' });
   }
 
   const slug = await buildSlug(title);
@@ -39,6 +47,7 @@ const createBlog = asyncHandler(async (req, res) => {
     status: normalizedStatus,
     author: req.user.id,
     summary: sanitizeSummary(content, summary),
+    coverImageUrl: coverImageUrl || '',
     publishedAt: normalizedStatus === 'published' ? new Date() : undefined
   });
 
@@ -83,7 +92,7 @@ const getBySlug = asyncHandler(async (req, res) => {
 
 const updateBlog = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { title, content, status, summary } = req.body;
+  const { title, content, status, summary, coverImageUrl } = req.body;
 
   const blog = await Blog.findById(id);
   if (!blog) {
@@ -102,6 +111,12 @@ const updateBlog = asyncHandler(async (req, res) => {
   }
   if (summary !== undefined) {
     blog.summary = sanitizeSummary(blog.content, summary);
+  }
+  if (coverImageUrl !== undefined) {
+    if (coverImageUrl !== '' && !isAllowedImageDataUrl(coverImageUrl)) {
+      return res.status(400).json({ message: 'Cover image must be a PNG, JPG, WEBP, or GIF under 400 KB' });
+    }
+    blog.coverImageUrl = coverImageUrl || '';
   }
   if (status) {
     const normalizedStatus = status === 'published' ? 'published' : 'draft';

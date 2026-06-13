@@ -7,8 +7,10 @@ import {
   register,
   googleLogin,
   resendVerification,
+  updateProfile,
   type AuthPayload,
-  type AuthResult
+  type AuthResult,
+  type ProfileUpdatePayload
 } from '../services/auth';
 import type { ReactNode } from 'react';
 import type { User, UserRole } from '../utils/types';
@@ -24,6 +26,7 @@ interface AuthContextValue {
   registerUser: (payload: AuthPayload) => Promise<AuthResult>;
   googleLoginUser: (credential: string) => Promise<User>;
   resendVerificationEmail: (email: string) => Promise<string>;
+  updateProfileDetails: (payload: ProfileUpdatePayload) => Promise<User>;
   logoutUser: () => Promise<void>;
 }
 
@@ -52,6 +55,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     queryClient.removeQueries({ queryKey: ['me'] });
   };
 
+  const updateProfileDetails = async (payload: ProfileUpdatePayload) => {
+    const result = await updateProfile(payload);
+    queryClient.setQueryData(['me'], result.user);
+    return result.user;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -69,6 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return result.user;
         },
         resendVerificationEmail: async (email: string) => (await resendVerification(email)).message,
+        updateProfileDetails,
         logoutUser
       }}
     >

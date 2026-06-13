@@ -7,6 +7,8 @@ export interface User {
   name: string;
   email: string;
   bio?: string;
+  avatarUrl?: string;
+  coverImageUrl?: string;
   role: UserRole;
   emailVerified: boolean;
 }
@@ -17,6 +19,7 @@ export interface Blog {
   slug: string;
   content: string;
   summary?: string;
+  coverImageUrl?: string;
   status: BlogStatus;
   author: User;
   likes?: number;

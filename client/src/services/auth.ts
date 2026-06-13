@@ -13,6 +13,12 @@ export interface AuthResult {
   message?: string;
 }
 
+export interface ProfileUpdatePayload {
+  bio?: string;
+  avatarUrl?: string;
+  coverImageUrl?: string;
+}
+
 export const googleLogin = async (credential: string): Promise<AuthResult> => {
   const { data } = await api.post('/auth/google', { credential });
   return data;
@@ -35,6 +41,11 @@ export const logout = async (): Promise<void> => {
 export const fetchMe = async (): Promise<User> => {
   const { data } = await api.get('/auth/me');
   return data.user;
+};
+
+export const updateProfile = async (payload: ProfileUpdatePayload): Promise<AuthResult> => {
+  const { data } = await api.put('/auth/profile', payload);
+  return data;
 };
 
 export const verifyEmail = async (token: string): Promise<AuthResult> => {

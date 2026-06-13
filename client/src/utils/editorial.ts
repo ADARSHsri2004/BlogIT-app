@@ -22,7 +22,10 @@ const getBlogKey = (blog: Pick<Blog, '_id' | 'slug' | 'title'>) => blog.slug || 
 const getVisualIndex = (key: string) =>
   key.split('').reduce((total, char) => total + char.charCodeAt(0), 0);
 
-export const getEditorialImage = (blog: Pick<Blog, '_id' | 'slug' | 'title'>) => {
+export const getEditorialImage = (blog: Pick<Blog, '_id' | 'slug' | 'title' | 'coverImageUrl'>) => {
+  if (blog.coverImageUrl) {
+    return blog.coverImageUrl;
+  }
   const index = getVisualIndex(getBlogKey(blog)) % editorialImages.length;
   return editorialImages[index];
 };

@@ -6,6 +6,7 @@ export interface BlogPayload {
   content: string;
   status?: 'draft' | 'published';
   summary?: string;
+  coverImageUrl?: string;
 }
 
 export const fetchPublishedBlogs = async (): Promise<Blog[]> => {

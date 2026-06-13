@@ -42,9 +42,16 @@ const publicUser = (user) => ({
   name: user.name,
   email: user.email,
   bio: user.bio,
+  avatarUrl: user.avatarUrl,
+  coverImageUrl: user.coverImageUrl,
   role: user.role,
   emailVerified: user.emailVerified
 });
+
+const isAllowedImageDataUrl = (value) =>
+  typeof value === 'string' &&
+  /^data:image\/(png|jpe?g|webp|gif);base64,/i.test(value) &&
+  value.length <= 400000;
 
 const signAccessToken = (user) =>
   jwt.sign(
@@ -183,6 +190,39 @@ const me = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: 'User not found' });
   }
   return res.json({ user: publicUser(user) });
+});
+
+const updateProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  const { bio, avatarUrl, coverImageUrl } = req.body;
+
+  if (bio !== undefined) {
+    if (typeof bio !== 'string' || bio.length > 160) {
+      return res.status(400).json({ message: 'Bio must be 160 characters or fewer' });
+    }
+    user.bio = bio.trim();
+  }
+
+  if (avatarUrl !== undefined) {
+    if (avatarUrl !== '' && !isAllowedImageDataUrl(avatarUrl)) {
+      return res.status(400).json({ message: 'Avatar image must be a PNG, JPG, WEBP, or GIF under 400 KB' });
+    }
+    user.avatarUrl = avatarUrl || '';
+  }
+
+  if (coverImageUrl !== undefined) {
+    if (coverImageUrl !== '' && !isAllowedImageDataUrl(coverImageUrl)) {
+      return res.status(400).json({ message: 'Cover image must be a PNG, JPG, WEBP, or GIF under 400 KB' });
+    }
+    user.coverImageUrl = coverImageUrl || '';
+  }
+
+  await user.save();
+  return res.json({ user: publicUser(user), message: 'Profile updated' });
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
@@ -330,6 +370,7 @@ module.exports = {
   refresh,
   logout,
   me,
+  updateProfile,
   verifyEmail,
   resendVerification,
   forgotPassword,

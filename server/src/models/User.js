@@ -61,6 +61,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       maxlength: 160,
       default: ''
+    },
+    avatarUrl: {
+      type: String,
+      maxlength: 400000,
+      default: ''
+    },
+    coverImageUrl: {
+      type: String,
+      maxlength: 400000,
+      default: ''
     }
   },
   { timestamps: true }

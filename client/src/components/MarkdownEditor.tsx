@@ -15,13 +15,13 @@ const MarkdownEditor = ({ value, onChange }: EditorProps) => {
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <textarea className="h-64 w-full rounded-lg border border-slate-200 p-3" value={value} readOnly />;
+    return <textarea className="h-64 w-full rounded-2xl border border-slate-200 bg-white p-4 text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" value={value} readOnly />;
   }
 
   return (
     <div
       data-color-mode={theme}
-      className="rounded-xl border border-slate-200 shadow-inner dark:border-slate-700"
+      className="overflow-hidden rounded-[1.4rem] border border-slate-200 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] dark:border-slate-700 dark:bg-slate-950"
     >
       <MDEditor value={value} onChange={(val) => onChange(val || '')} height={400} preview="edit" />
     </div>

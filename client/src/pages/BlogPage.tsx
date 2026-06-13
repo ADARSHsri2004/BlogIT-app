@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Heart, MessageCircle, Send, Share2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, Send, Share2, Sparkles } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -11,7 +11,7 @@ import EmptyState from '../components/EmptyState';
 import { commentOnBlog, deleteBlog, fetchBlogBySlug, likeBlog, shareBlog } from '../services/blogs';
 import { useAuth } from '../hooks/useAuth';
 import { formatDisplayDate, getEditorialImage } from '../utils/editorial';
-import { AnimatedButton, AnimatedLinkButton } from '../components/animate-ui/button';
+import { AnimatedButton, AnimatedIconButton, AnimatedLinkButton } from '../components/animate-ui/button';
 import type { Blog } from '../utils/types';
 
 const BlogPage = () => {
@@ -113,114 +113,96 @@ const BlogPage = () => {
     });
   };
 
+  const scrollToComments = () => {
+    document.getElementById('comments')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <MainLayout>
-      <article className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        <div className="h-80 bg-slate-100 dark:bg-slate-700">
-          <img src={getEditorialImage(blog)} alt="" className="h-full w-full object-cover" />
-        </div>
-        <div className="px-6 py-8">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted dark:text-slate-300">{blog.status}</p>
-              <h1 className="mt-2 font-serif text-4xl font-bold text-ink dark:text-slate-100">{blog.title}</h1>
-              <div className="mt-3 flex items-center gap-3 text-sm text-muted dark:text-slate-300">
-                <span className="font-semibold text-ink dark:text-slate-100">{blog.author?.name}</span>
-                <span>/</span>
-                <span>{formatDisplayDate(blog.publishedAt || blog.createdAt)}</span>
-              </div>
-            </div>
-            {isAuthor ? (
-              <div className="flex gap-2">
-                <AnimatedLinkButton
-                  to={`/write/${blog.slug}`}
-                  variant="secondary"
-                  size="sm"
-                >
-                  Edit
-                </AnimatedLinkButton>
-                <AnimatedButton
-                  onClick={() => deleteMutation.mutate(blog._id)}
-                  variant="danger"
-                  size="sm"
-                  disabled={deleteMutation.isPending}
-                >
-                  Delete
-                </AnimatedButton>
-              </div>
-            ) : null}
-          </div>
-          <div className="prose prose-lg mt-8 max-w-none prose-headings:text-ink prose-p:text-ink prose-strong:text-ink prose-a:text-accent">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{blog.content}</ReactMarkdown>
-          </div>
-          <motion.section
-            className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/60 sm:p-5"
-            initial={{ opacity: 0, y: 18 }}
+    <MainLayout contentClassName="px-3 py-5 sm:px-4 lg:px-5 xl:px-6">
+      <article className="mx-auto max-w-5xl pb-16">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: 'easeOut' }}>
+          <AnimatedLinkButton to="/feed" variant="ghost" size="sm" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to feed
+          </AnimatedLinkButton>
+        </motion.div>
+
+        <section className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.38, ease: 'easeOut' }}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
           >
-            <div className="grid gap-3 sm:grid-cols-3">
-              <motion.button
-                type="button"
-                onClick={handleLike}
-                disabled={hasLiked || likeMutation.isPending}
-                className="group flex min-h-16 items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-rose-200 hover:bg-rose-50 disabled:cursor-default dark:border-slate-700 dark:bg-slate-800 dark:hover:border-rose-400/40 dark:hover:bg-rose-950/30"
-                whileHover={{ y: hasLiked ? 0 : -2 }}
-                whileTap={{ scale: hasLiked ? 1 : 0.98 }}
-              >
-                <span>
-                  <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-muted dark:text-slate-400">
-                    Like
-                  </span>
-                  <span className="text-lg font-bold text-ink dark:text-slate-100">{blog.likes ?? 0}</span>
-                </span>
-                <motion.span
-                  animate={hasLiked ? { scale: [1, 1.25, 1], rotate: [0, -10, 0] } : { scale: 1 }}
-                  className="rounded-full bg-rose-100 p-2 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300"
+            <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500 dark:text-slate-400">{blog.status}</p>
+            <h1 className="mt-4 max-w-3xl font-serif text-4xl font-semibold leading-tight text-ink dark:text-slate-50 sm:text-5xl">
+              {blog.title}
+            </h1>
+            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
+              <span className="font-semibold text-ink dark:text-slate-100">{blog.author?.name}</span>
+              <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+              <span>{formatDisplayDate(blog.publishedAt || blog.createdAt)}</span>
+            </div>
+            {blog.summary ? (
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">{blog.summary}</p>
+            ) : null}
+
+            <div className="mt-8 flex flex-wrap items-center gap-3 border-y border-slate-200/80 py-4 dark:border-slate-800">
+              <div className="flex items-center gap-3 rounded-full bg-white/80 px-2 py-2 shadow-sm ring-1 ring-slate-200/80 backdrop-blur dark:bg-slate-900/70 dark:ring-slate-700">
+                <AnimatedIconButton
+                  onClick={handleLike}
+                  disabled={hasLiked || likeMutation.isPending}
+                  variant={hasLiked ? 'primary' : 'secondary'}
+                  aria-label="Like post"
                 >
-                  <Heart className={hasLiked ? 'h-5 w-5 fill-current' : 'h-5 w-5'} />
-                </motion.span>
-              </motion.button>
+                  <Heart className={hasLiked ? 'h-4 w-4 fill-current' : 'h-4 w-4'} />
+                </AnimatedIconButton>
+                <div className="pr-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Likes</p>
+                  <p className="text-sm font-semibold text-ink dark:text-slate-100">{blog.likes ?? 0}</p>
+                </div>
+              </div>
 
-              <motion.div
-                className="flex min-h-16 items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-800"
-                whileHover={{ y: -2 }}
-              >
-                <span>
-                  <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-muted dark:text-slate-400">
-                    Comments
-                  </span>
-                  <span className="text-lg font-bold text-ink dark:text-slate-100">{comments.length}</span>
-                </span>
-                <span className="rounded-full bg-indigo-100 p-2 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-300">
-                  <MessageCircle className="h-5 w-5" />
-                </span>
-              </motion.div>
+              <div className="flex items-center gap-3 rounded-full bg-white/80 px-2 py-2 shadow-sm ring-1 ring-slate-200/80 backdrop-blur dark:bg-slate-900/70 dark:ring-slate-700">
+                <AnimatedIconButton onClick={scrollToComments} variant="secondary" aria-label="Jump to comments">
+                  <MessageCircle className="h-4 w-4" />
+                </AnimatedIconButton>
+                <div className="pr-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Comments</p>
+                  <p className="text-sm font-semibold text-ink dark:text-slate-100">{comments.length}</p>
+                </div>
+              </div>
 
-              <motion.button
-                type="button"
-                onClick={handleShare}
-                disabled={shareMutation.isPending}
-                className="flex min-h-16 items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50 disabled:opacity-70 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-emerald-400/40 dark:hover:bg-emerald-950/30"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span>
-                  <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-muted dark:text-slate-400">
-                    Share
-                  </span>
-                  <span className="text-lg font-bold text-ink dark:text-slate-100">{blog.shares ?? 0}</span>
-                </span>
-                <span className="rounded-full bg-emerald-100 p-2 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300">
-                  <Share2 className="h-5 w-5" />
-                </span>
-              </motion.button>
+              <div className="flex items-center gap-3 rounded-full bg-white/80 px-2 py-2 shadow-sm ring-1 ring-slate-200/80 backdrop-blur dark:bg-slate-900/70 dark:ring-slate-700">
+                <AnimatedIconButton onClick={handleShare} disabled={shareMutation.isPending} variant="secondary" aria-label="Share post">
+                  <Share2 className="h-4 w-4" />
+                </AnimatedIconButton>
+                <div className="pr-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Shares</p>
+                  <p className="text-sm font-semibold text-ink dark:text-slate-100">{blog.shares ?? 0}</p>
+                </div>
+              </div>
+
+              {isAuthor ? (
+                <div className="ml-auto flex flex-wrap gap-2">
+                  <AnimatedLinkButton to={`/write/${blog.slug}`} variant="secondary" size="sm">
+                    Edit story
+                  </AnimatedLinkButton>
+                  <AnimatedButton
+                    onClick={() => deleteMutation.mutate(blog._id)}
+                    variant="danger"
+                    size="sm"
+                    disabled={deleteMutation.isPending}
+                  >
+                    Delete
+                  </AnimatedButton>
+                </div>
+              ) : null}
             </div>
 
             <AnimatePresence>
               {shareStatus ? (
                 <motion.p
-                  className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-muted shadow-sm dark:bg-slate-800 dark:text-slate-300"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200/80 backdrop-blur dark:bg-slate-900/70 dark:text-slate-300 dark:ring-slate-700"
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
@@ -230,77 +212,145 @@ const BlogPage = () => {
                 </motion.p>
               ) : null}
             </AnimatePresence>
+          </motion.div>
 
-            <form onSubmit={handleCommentSubmit} className="mt-6 grid gap-3">
-              <div className="grid gap-3 sm:grid-cols-[180px_1fr_auto]">
-                <label className="sr-only" htmlFor="comment-name">
-                  Name
-                </label>
-                <input
-                  id="comment-name"
-                  value={commentName}
-                  onChange={(event) => setCommentName(event.target.value)}
-                  maxLength={80}
-                  placeholder={user?.name || 'Your name'}
-                  className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                />
-                <label className="sr-only" htmlFor="comment-message">
-                  Comment
-                </label>
-                <input
-                  id="comment-message"
-                  value={commentMessage}
-                  onChange={(event) => setCommentMessage(event.target.value)}
-                  maxLength={600}
-                  placeholder="Add a thoughtful comment"
-                  className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                />
-                <AnimatedButton
-                  type="submit"
-                  size="md"
-                  disabled={!commentMessage.trim() || commentMutation.isPending}
-                  className="h-11 rounded-xl"
-                >
-                  <Send className="h-4 w-4" />
-                  Comment
-                </AnimatedButton>
+          <motion.aside
+            className="lg:sticky lg:top-24"
+            initial={{ opacity: 0, scale: 0.97, y: 14 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut', delay: 0.08 }}
+          >
+            <div className="overflow-hidden rounded-[2rem] bg-slate-100 shadow-[0_24px_70px_rgba(15,23,42,0.16)] dark:bg-slate-900">
+              <div className="aspect-[4/5]">
+                <img src={getEditorialImage(blog)} alt="" className="h-full w-full object-cover" />
               </div>
-              {commentMutation.isError ? (
-                <p className="text-sm font-medium text-red-600 dark:text-red-300">
-                  {commentMutation.error.message}
-                </p>
-              ) : null}
-            </form>
-
-            <div className="mt-5 space-y-3">
-              <AnimatePresence initial={false}>
-                {sortedComments.map((comment) => (
-                  <motion.div
-                    key={comment._id || `${comment.name}-${comment.createdAt}`}
-                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
-                    initial={{ opacity: 0, y: 12, scale: 0.98 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                    transition={{ duration: 0.24, ease: 'easeOut' }}
-                  >
-                    <div className="flex flex-wrap items-center gap-2 text-sm">
-                      <span className="font-semibold text-ink dark:text-slate-100">{comment.name || 'Reader'}</span>
-                      <span className="text-xs text-muted dark:text-slate-400">
-                        {formatDisplayDate(comment.createdAt)}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-ink dark:text-slate-200">{comment.message}</p>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              {!comments.length ? (
-                <p className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-muted dark:border-slate-700 dark:text-slate-300">
-                  No comments yet. Be the first to respond.
-                </p>
-              ) : null}
             </div>
-          </motion.section>
-        </div>
+            <div className="mt-5 space-y-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
+              <p className="font-semibold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">Story Notes</p>
+              <p>
+                Read, react, and share without the extra chrome. This layout keeps the focus on the writing while the
+                key actions stay close by.
+              </p>
+            </div>
+          </motion.aside>
+        </section>
+
+        <motion.div
+          className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_14rem]"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: 'easeOut', delay: 0.12 }}
+        >
+          <div className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink prose-p:text-ink prose-strong:text-ink prose-a:text-accent dark:prose-headings:text-slate-50 dark:prose-p:text-slate-200 dark:prose-strong:text-slate-50 dark:prose-a:text-cyan-300">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{blog.content}</ReactMarkdown>
+          </div>
+
+          <aside className="hidden lg:block">
+            <div className="sticky top-24 space-y-6 border-l border-slate-200 pl-6 dark:border-slate-800">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Readers</p>
+                <p className="mt-2 text-2xl font-semibold text-ink dark:text-slate-100">{(blog.likes ?? 0) + comments.length + (blog.shares ?? 0)}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">A quick read with visible momentum from the community around it.</p>
+              </div>
+              <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                <p>{blog.likes ?? 0} likes</p>
+                <p>{comments.length} comments</p>
+                <p>{blog.shares ?? 0} shares</p>
+              </div>
+            </div>
+          </aside>
+        </motion.div>
+
+        <motion.section
+          id="comments"
+          className="mt-16 border-t border-slate-200 pt-10 dark:border-slate-800"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: 'easeOut', delay: 0.18 }}
+        >
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500 dark:text-slate-400">Conversation</p>
+              <h2 className="mt-3 font-serif text-3xl font-semibold text-ink dark:text-slate-50">What readers are saying</h2>
+              <p className="mt-4 max-w-md text-base leading-7 text-slate-600 dark:text-slate-300">
+                Drop a response, add context, or leave a note for the next reader who lands here.
+              </p>
+            </div>
+
+            <div>
+              <form onSubmit={handleCommentSubmit} className="grid gap-3 rounded-[1.75rem] bg-white/80 p-5 shadow-sm ring-1 ring-slate-200/80 backdrop-blur dark:bg-slate-900/70 dark:ring-slate-700">
+                <div className="grid gap-3 sm:grid-cols-[180px_1fr]">
+                  <label className="sr-only" htmlFor="comment-name">
+                    Name
+                  </label>
+                  <input
+                    id="comment-name"
+                    value={commentName}
+                    onChange={(event) => setCommentName(event.target.value)}
+                    maxLength={80}
+                    placeholder={user?.name || 'Your name'}
+                    className="h-12 rounded-full border border-slate-200 bg-white px-4 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                  />
+                  <label className="sr-only" htmlFor="comment-message">
+                    Comment
+                  </label>
+                  <input
+                    id="comment-message"
+                    value={commentMessage}
+                    onChange={(event) => setCommentMessage(event.target.value)}
+                    maxLength={600}
+                    placeholder="Add a thoughtful comment"
+                    className="h-12 rounded-full border border-slate-200 bg-white px-4 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                  />
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  {commentMutation.isError ? (
+                    <p className="text-sm font-medium text-red-600 dark:text-red-300">{commentMutation.error.message}</p>
+                  ) : (
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Keep it kind, clear, and useful.</p>
+                  )}
+                  <AnimatedButton
+                    type="submit"
+                    size="md"
+                    disabled={!commentMessage.trim() || commentMutation.isPending}
+                    className="min-w-36"
+                  >
+                    <Send className="h-4 w-4" />
+                    Comment
+                  </AnimatedButton>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div className="mt-10 space-y-8">
+            <AnimatePresence initial={false}>
+              {sortedComments.map((comment, index) => (
+                <motion.article
+                  key={comment._id || `${comment.name}-${comment.createdAt}`}
+                  className="relative border-l border-slate-200 pl-6 dark:border-slate-800"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.24, ease: 'easeOut', delay: index * 0.03 }}
+                >
+                  <span className="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full bg-accent" />
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
+                    <span className="font-semibold text-ink dark:text-slate-100">{comment.name || 'Reader'}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{formatDisplayDate(comment.createdAt)}</span>
+                  </div>
+                  <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-700 dark:text-slate-200">{comment.message}</p>
+                </motion.article>
+              ))}
+            </AnimatePresence>
+
+            {!comments.length ? (
+              <p className="border-t border-dashed border-slate-300 pt-6 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-300">
+                No comments yet. Be the first to respond.
+              </p>
+            ) : null}
+          </div>
+        </motion.section>
       </article>
     </MainLayout>
   );

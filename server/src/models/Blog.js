@@ -35,6 +35,11 @@ const blogSchema = new mongoose.Schema(
       maxlength: 200,
       default: ''
     },
+    coverImageUrl: {
+      type: String,
+      maxlength: 400000,
+      default: ''
+    },
     likes: {
       type: Number,
       default: 0,

@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { Search, X } from 'lucide-react';
+import { Search, Sparkles, X } from 'lucide-react';
 import MainLayout from '../layouts/MainLayout';
 import EmptyState from '../components/EmptyState';
 import BlogCard from '../components/BlogCard';
@@ -51,40 +50,40 @@ const FeedPage = () => {
           </motion.div>
 
           <motion.div
-            className="flex w-full items-center gap-4 lg:w-auto"
+            className="w-full lg:w-auto"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...softTransition, delay: 0.12 }}
           >
-            <label className="relative flex min-w-0 flex-1 items-center lg:w-80 lg:flex-none">
-              <span className="sr-only">Search posts</span>
-              <Search className="pointer-events-none absolute left-4 h-5 w-5 text-slate-700 dark:text-slate-300 border-1-black" aria-hidden="true" />
-              <input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                className="h-14 w-full border border-transparent bg-transparent pl-12 pr-10 text-base outline-none transition placeholder:text-slate-400 focus:border-slate-300 focus:bg-white/70 dark:text-slate-100 dark:focus:border-slate-700 dark:focus:bg-slate-950/70"
-                placeholder="Search"
-              />
-              {searchTerm ? (
-                <button
-                  type="button"
-                  className="absolute right-2 flex h-7 w-7 items-center justify-center text-slate-500 transition hover:text-accent dark:text-slate-400"
-                  onClick={() => setSearchTerm('')}
-                  aria-label="Clear search"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              ) : null}
-            </label>
+            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] lg:min-w-[34rem]">
+              <label className="relative flex min-w-0 items-center overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white/70 transition focus-within:border-cyan-300 focus-within:bg-white dark:border-slate-800 dark:bg-slate-900/80 dark:focus-within:border-cyan-500 dark:focus-within:bg-slate-950">
+                <span className="sr-only">Search posts</span>
+                <div className="flex h-14 w-14 items-center justify-center text-slate-500 dark:text-slate-400">
+                  <Search className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <input
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  className="h-14 w-full bg-transparent pr-12 text-base text-slate-700 outline-none placeholder:text-slate-400 dark:text-slate-100"
+                  placeholder="Search stories, topics, or writers"
+                />
+                {searchTerm ? (
+                  <button
+                    type="button"
+                    className="absolute right-3 flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-accent dark:text-slate-400 dark:hover:bg-slate-800"
+                    onClick={() => setSearchTerm('')}
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : null}
+              </label>
 
-            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }} transition={springTransition}>
-              <Link
-                to="/write"
-                className="inline-flex h-14 shrink-0 items-center justify-center bg-cyan-500 px-7 text-sm font-bold text-white shadow-[0_14px_28px_rgba(6,182,212,0.18)] transition hover:bg-cyan-600 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
-              >
+              <AnimatedLinkButton to="/write" size="lg" className="h-14 rounded-[1.2rem] px-6 font-bold shadow-[0_16px_30px_rgba(6,182,212,0.2)]">
+                <Sparkles className="h-4 w-4" />
                 Create a Post
-              </Link>
-            </motion.div>
+              </AnimatedLinkButton>
+            </div>
           </motion.div>
         </div>
 
@@ -164,4 +163,3 @@ const FeedPage = () => {
 };
 
 export default FeedPage;
-
