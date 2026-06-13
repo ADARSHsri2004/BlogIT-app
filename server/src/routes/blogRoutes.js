@@ -5,6 +5,7 @@ const {
   listMine,
   getBySlug,
   updateBlog,
+  regenerateMetadata,
   deleteBlog,
   likeBlog,
   shareBlog,
@@ -19,6 +20,7 @@ router.get('/me', auth, listMine);
 router.post('/:id/like', likeBlog);
 router.post('/:id/share', shareBlog);
 router.post('/:id/comments', commentOnBlog);
+router.post('/:id/metadata/regenerate', auth, requireVerifiedEmail, requireRole('admin', 'author'), regenerateMetadata);
 router.get('/:slug', optionalAuth, getBySlug); // allows drafts when requester is author
 router.post('/', auth, requireVerifiedEmail, requireRole('admin', 'author'), createBlog);
 router.put('/:id', auth, requireVerifiedEmail, requireRole('admin', 'author'), updateBlog);

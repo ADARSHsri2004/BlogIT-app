@@ -23,7 +23,17 @@ const FeedPage = () => {
   const blogs = data ?? [];
   const query = searchTerm.trim().toLowerCase();
   const displayedBlogs = blogs.filter((blog) => {
-    const text = [blog.title, blog.summary, blog.content, blog.author?.name].filter(Boolean).join(' ').toLowerCase();
+    const text = [
+      blog.title,
+      blog.summary,
+      blog.content,
+      blog.author?.name,
+      ...(blog.generatedMetadata?.categories || []),
+      ...(blog.generatedMetadata?.tags || [])
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
 
     return !query || text.includes(query);
   });

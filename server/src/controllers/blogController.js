@@ -1,6 +1,7 @@
 const slugify = require('slugify');
 const Blog = require('../models/Blog');
 const asyncHandler = require('../utils/asyncHandler');
+const { markMetadataQueued, queueMetadataGeneration } = require('../services/metadataEngine');
 
 const buildSlug = async (title, excludeId) => {
   const base = slugify(title, { lower: true, strict: true }) || 'post';
@@ -40,7 +41,7 @@ const createBlog = asyncHandler(async (req, res) => {
 
   const slug = await buildSlug(title);
   const normalizedStatus = status === 'published' ? 'published' : 'draft';
-  const blog = await Blog.create({
+  const blog = new Blog({
     title,
     slug,
     content,
@@ -50,6 +51,9 @@ const createBlog = asyncHandler(async (req, res) => {
     coverImageUrl: coverImageUrl || '',
     publishedAt: normalizedStatus === 'published' ? new Date() : undefined
   });
+  markMetadataQueued(blog);
+  await blog.save();
+  queueMetadataGeneration(blog._id);
 
   return res.status(201).json({ blog });
 });
@@ -102,12 +106,16 @@ const updateBlog = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: 'Not authorized to update this blog' });
   }
 
+  let shouldRegenerateMetadata = false;
+
   if (title) {
     blog.title = title;
     blog.slug = await buildSlug(title, blog._id);
+    shouldRegenerateMetadata = true;
   }
   if (content) {
     blog.content = content;
+    shouldRegenerateMetadata = true;
   }
   if (summary !== undefined) {
     blog.summary = sanitizeSummary(blog.content, summary);
@@ -120,6 +128,9 @@ const updateBlog = asyncHandler(async (req, res) => {
   }
   if (status) {
     const normalizedStatus = status === 'published' ? 'published' : 'draft';
+    if (blog.status !== normalizedStatus) {
+      shouldRegenerateMetadata = true;
+    }
     blog.status = normalizedStatus;
     if (normalizedStatus === 'published' && !blog.publishedAt) {
       blog.publishedAt = new Date();
@@ -129,8 +140,31 @@ const updateBlog = asyncHandler(async (req, res) => {
     }
   }
 
+  if (shouldRegenerateMetadata) {
+    markMetadataQueued(blog);
+  }
   await blog.save();
+  if (shouldRegenerateMetadata) {
+    queueMetadataGeneration(blog._id);
+  }
   return res.json({ blog });
+});
+
+const regenerateMetadata = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const blog = await Blog.findById(id);
+  if (!blog) {
+    return res.status(404).json({ message: 'Blog not found' });
+  }
+  if (blog.author.toString() !== req.user.id && req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Not authorized to regenerate metadata for this blog' });
+  }
+
+  markMetadataQueued(blog);
+  await blog.save();
+  queueMetadataGeneration(blog._id);
+
+  return res.status(202).json({ blog, message: 'Metadata regeneration queued' });
 });
 
 const deleteBlog = asyncHandler(async (req, res) => {
@@ -202,6 +236,7 @@ module.exports = {
   listMine,
   getBySlug,
   updateBlog,
+  regenerateMetadata,
   deleteBlog,
   likeBlog,
   shareBlog,

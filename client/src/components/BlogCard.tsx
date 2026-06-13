@@ -66,6 +66,18 @@ const BlogCard = ({ blog }: BlogCardProps) => (
         >
           {blog.title}
         </Link>
+        {blog.generatedMetadata?.categories?.length ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {blog.generatedMetadata.categories.slice(0, 2).map((category) => (
+              <span
+                key={category}
+                className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+              >
+                {category}
+              </span>
+            ))}
+          </div>
+        ) : null}
         <p className="mt-4 line-clamp-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
           {blog.summary || 'No summary provided.'}
         </p>

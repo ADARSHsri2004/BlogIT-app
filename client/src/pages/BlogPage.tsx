@@ -1,18 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, Heart, MessageCircle, Send, Share2, Sparkles } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
+import { ArrowLeft, Heart, MessageCircle, RefreshCcw, Send, Share2, Sparkles } from 'lucide-react';
+import { type FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import MainLayout from '../layouts/MainLayout';
 import Spinner from '../components/Spinner';
 import EmptyState from '../components/EmptyState';
-import { commentOnBlog, deleteBlog, fetchBlogBySlug, likeBlog, shareBlog } from '../services/blogs';
+import { commentOnBlog, deleteBlog, fetchBlogBySlug, likeBlog, regenerateBlogMetadata, shareBlog } from '../services/blogs';
 import { useAuth } from '../hooks/useAuth';
 import { formatDisplayDate, getEditorialImage } from '../utils/editorial';
 import { AnimatedButton, AnimatedIconButton, AnimatedLinkButton } from '../components/animate-ui/button';
 import type { Blog } from '../utils/types';
+
+const activeProcessingStates = new Set(['queued', 'processing']);
 
 const BlogPage = () => {
   const { slug } = useParams();
@@ -26,7 +28,11 @@ const BlogPage = () => {
   const { data: blog, isLoading, error } = useQuery({
     queryKey: ['blog', slug],
     queryFn: () => fetchBlogBySlug(slug || ''),
-    enabled: Boolean(slug)
+    enabled: Boolean(slug),
+    refetchInterval: (query) => {
+      const metadataStatus = (query.state.data as Blog | undefined)?.generatedMetadata?.processingStatus;
+      return metadataStatus && activeProcessingStates.has(metadataStatus) ? 2500 : false;
+    }
   });
 
   const deleteMutation = useMutation({
@@ -64,12 +70,23 @@ const BlogPage = () => {
     }
   });
 
+  const regenerateMutation = useMutation({
+    mutationFn: (id: string) => regenerateBlogMetadata(id),
+    onSuccess: syncBlog
+  });
+
+  useEffect(() => {
+    if (!blog) return;
+    document.title = blog.generatedMetadata?.seoTitle || blog.title;
+  }, [blog]);
+
   if (isLoading) return <Spinner />;
   if (error || !blog) {
     return <EmptyState title="Blog not found" description={error?.message || 'The blog does not exist.'} />;
   }
 
   const isAuthor = user?.id === blog.author?._id || user?.id === blog.author?.id;
+  const metadata = blog.generatedMetadata;
   const comments = blog.comments ?? [];
   const hasLiked = localStorage.getItem(`blogit-liked-${blog._id}`) === 'true';
   const articleUrl = typeof window === 'undefined' ? '' : window.location.href;
@@ -142,8 +159,32 @@ const BlogPage = () => {
               <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600" />
               <span>{formatDisplayDate(blog.publishedAt || blog.createdAt)}</span>
             </div>
+            {metadata?.categories?.length ? (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {metadata.categories.map((category) => (
+                  <span
+                    key={category}
+                    className="rounded-full border border-slate-200 bg-white/85 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300"
+                  >
+                    {category}
+                  </span>
+                ))}
+              </div>
+            ) : null}
             {blog.summary ? (
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">{blog.summary}</p>
+            ) : null}
+            {metadata?.tldrBullets?.length ? (
+              <div className="mt-6 grid gap-3">
+                {metadata.tldrBullets.map((bullet) => (
+                  <div
+                    key={bullet}
+                    className="max-w-2xl rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm leading-6 text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-200"
+                  >
+                    {bullet}
+                  </div>
+                ))}
+              </div>
             ) : null}
 
             <div className="mt-8 flex flex-wrap items-center gap-3 border-y border-slate-200/80 py-4 dark:border-slate-800">
@@ -227,10 +268,60 @@ const BlogPage = () => {
             </div>
             <div className="mt-5 space-y-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
               <p className="font-semibold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">Story Notes</p>
-              <p>
-                Read, react, and share without the extra chrome. This layout keeps the focus on the writing while the
-                key actions stay close by.
-              </p>
+              <p>{metadata?.metaDescription || 'Read, react, and share without the extra chrome. This layout keeps the focus on the writing while the key actions stay close by.'}</p>
+              {metadata?.tags?.length ? (
+                <div className="flex flex-wrap gap-2">
+                  {metadata.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-medium text-cyan-700 dark:border-cyan-900/70 dark:bg-cyan-950/30 dark:text-cyan-200"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              {isAuthor ? (
+                <div className="rounded-[1.4rem] border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Repurposing Engine</p>
+                      <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                        Status: {metadata?.processingStatus || 'idle'}
+                        {metadata?.provider ? ` via ${metadata.provider}` : ''}
+                      </p>
+                    </div>
+                    <AnimatedButton
+                      variant="secondary"
+                      size="sm"
+                      disabled={regenerateMutation.isPending}
+                      onClick={() => regenerateMutation.mutate(blog._id)}
+                    >
+                      <RefreshCcw className={`h-4 w-4 ${regenerateMutation.isPending ? 'animate-spin' : ''}`} />
+                      Regenerate
+                    </AnimatedButton>
+                  </div>
+                  {metadata?.socialCopy?.twitter ? (
+                    <div className="mt-4 space-y-3 border-t border-slate-200/80 pt-4 dark:border-slate-800">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Twitter Copy</p>
+                      <p className="text-sm leading-6 text-slate-700 dark:text-slate-200">{metadata.socialCopy.twitter}</p>
+                    </div>
+                  ) : null}
+                  {metadata?.socialCopy?.linkedin ? (
+                    <div className="mt-4 space-y-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">LinkedIn Copy</p>
+                      <p className="text-sm leading-6 text-slate-700 dark:text-slate-200">{metadata.socialCopy.linkedin}</p>
+                    </div>
+                  ) : null}
+                  {metadata?.validationErrors?.length ? (
+                    <div className="mt-4 space-y-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-800 dark:border-amber-900/70 dark:bg-amber-950/20 dark:text-amber-200">
+                      {metadata.validationErrors.map((item) => (
+                        <p key={item}>{item}</p>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </motion.aside>
         </section>

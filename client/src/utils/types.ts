@@ -22,6 +22,7 @@ export interface Blog {
   coverImageUrl?: string;
   status: BlogStatus;
   author: User;
+  generatedMetadata?: GeneratedMetadata;
   likes?: number;
   shares?: number;
   comments?: BlogComment[];
@@ -35,5 +36,25 @@ export interface BlogComment {
   name: string;
   message: string;
   createdAt: string;
+}
+
+export interface GeneratedMetadata {
+  seoSlug?: string;
+  seoTitle?: string;
+  metaDescription?: string;
+  categories?: string[];
+  tags?: string[];
+  tldrBullets?: string[];
+  socialCopy?: {
+    twitter?: string;
+    linkedin?: string;
+  };
+  processingStatus?: 'idle' | 'queued' | 'processing' | 'completed' | 'fallback' | 'failed';
+  sourceFingerprint?: string;
+  lastRequestedAt?: string;
+  lastProcessedAt?: string;
+  validationErrors?: string[];
+  fallbackReason?: string;
+  provider?: string;
 }
 

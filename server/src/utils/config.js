@@ -41,7 +41,15 @@ const config = {
   SMTP_USER: process.env.SMTP_USER || '',
   SMTP_PASS: process.env.SMTP_PASS || '',
   SMTP_SECURE: process.env.SMTP_SECURE === 'true',
-  EMAIL_FROM: process.env.EMAIL_FROM || 'BlogIT <no-reply@blogit.local>'
+  EMAIL_FROM: process.env.EMAIL_FROM || 'BlogIT <no-reply@blogit.local>',
+  METADATA_LLM_PROVIDER: process.env.METADATA_LLM_PROVIDER || 'gemini',
+  METADATA_LLM_API_URL:
+    process.env.METADATA_LLM_API_URL ||
+    'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
+  METADATA_LLM_API_KEY: process.env.METADATA_LLM_API_KEY || process.env.GEMINI_API_KEY || '',
+  METADATA_LLM_MODEL: process.env.METADATA_LLM_MODEL || process.env.GEMINI_MODEL || 'gemini-3.5-flash',
+  METADATA_LLM_TEMPERATURE: Number(process.env.METADATA_LLM_TEMPERATURE || 0.2),
+  METADATA_LLM_TIMEOUT_MS: Number(process.env.METADATA_LLM_TIMEOUT_MS || 20000)
 };
 
 module.exports = config;

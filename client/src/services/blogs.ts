@@ -34,6 +34,11 @@ export const updateBlog = async (id: string, payload: BlogPayload): Promise<Blog
   return data.blog;
 };
 
+export const regenerateBlogMetadata = async (id: string): Promise<Blog> => {
+  const { data } = await api.post(`/blogs/${id}/metadata/regenerate`);
+  return data.blog;
+};
+
 export const deleteBlog = async (id: string): Promise<void> => {
   await api.delete(`/blogs/${id}`);
 };

@@ -1,5 +1,79 @@
 const mongoose = require('mongoose');
 
+const generatedMetadataSchema = new mongoose.Schema(
+  {
+    seoSlug: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    seoTitle: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    metaDescription: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    categories: {
+      type: [String],
+      default: []
+    },
+    tags: {
+      type: [String],
+      default: []
+    },
+    tldrBullets: {
+      type: [String],
+      default: []
+    },
+    socialCopy: {
+      twitter: {
+        type: String,
+        trim: true,
+        default: ''
+      },
+      linkedin: {
+        type: String,
+        trim: true,
+        default: ''
+      }
+    },
+    processingStatus: {
+      type: String,
+      enum: ['idle', 'queued', 'processing', 'completed', 'fallback', 'failed'],
+      default: 'idle'
+    },
+    sourceFingerprint: {
+      type: String,
+      default: ''
+    },
+    lastRequestedAt: {
+      type: Date
+    },
+    lastProcessedAt: {
+      type: Date
+    },
+    validationErrors: {
+      type: [String],
+      default: []
+    },
+    fallbackReason: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    provider: {
+      type: String,
+      trim: true,
+      default: 'deterministic-fallback'
+    }
+  },
+  { _id: false }
+);
+
 const blogSchema = new mongoose.Schema(
   {
     title: {
@@ -70,6 +144,10 @@ const blogSchema = new mongoose.Schema(
         }
       }
     ],
+    generatedMetadata: {
+      type: generatedMetadataSchema,
+      default: () => ({})
+    },
     publishedAt: {
       type: Date
     }
